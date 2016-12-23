@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.example.administrator.moamoa_v10.mainview.PostAdapter;
+import com.example.administrator.moamoa_v10.service.AlarmService;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import java.util.Arrays;
@@ -159,6 +160,9 @@ public class MainActivity extends AppCompatActivity
                             PostAdapter adapter = new PostAdapter(getApplicationContext(), facebook.getListItem());
                             rv_post_list.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
                             rv_post_list.setAdapter(adapter);
+
+                            Intent intent = new Intent(MainActivity.this, AlarmService.class);
+                            startService(intent);
                         }},2000);
 
                     break;
