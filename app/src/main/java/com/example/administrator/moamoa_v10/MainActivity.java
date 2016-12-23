@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,18 +25,23 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.example.administrator.moamoa_v10.Config.DataConfig;
 import com.example.administrator.moamoa_v10.mainview.PostAdapter;
 import com.example.administrator.moamoa_v10.service.AlarmService;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    Facebook facebook;
-    RecyclerView rv_post_list;
+    Facebook facebook               = null;
+    RecyclerView rv_post_list       = null;
+    ArrayList<String> keywordList   = null;
 
 
     @Override
@@ -46,6 +52,8 @@ public class MainActivity extends AppCompatActivity
 
         // 페이스북 api
         facebook = new Facebook(this);
+
+        keywordList = new ArrayList<String>();
 
         // Recycler View 적용
 
@@ -70,6 +78,23 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
                         String inputValue = et.getText().toString();
 
+                        for(int i=0; i<keywordList.size(); i++)
+                        {
+                            if(keywordList.get(i).equals(inputValue) == true)
+                            {
+                                Snackbar.make(_view, "이미 존재하는 키워드 입니다.", Snackbar.LENGTH_LONG)
+                                        .setAction("Action", null).show();
+
+                                return;
+                            }
+                        }
+
+                        keywordList.add(inputValue);
+
+                        // SharedPreference 공간에 저장
+                        DataConfig.setKeywordArrayPref(getApplicationContext(), "KeywordList", keywordList);
+                        DataConfig.getKeywordArrayPref(getApplicationContext(), "KeywordList");
+
                         Snackbar.make(_view, "키워드 추가 완료", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
@@ -86,6 +111,10 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+
+
+
+
         // Drawer 기능을 이용하기 위한 레이아웃
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -99,6 +128,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
+
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -161,6 +194,7 @@ public class MainActivity extends AppCompatActivity
                             rv_post_list.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
                             rv_post_list.setAdapter(adapter);
 
+                            Log.i("KEYWORD", "알람 서비스 시작 전");
                             Intent intent = new Intent(MainActivity.this, AlarmService.class);
                             startService(intent);
                         }},2000);
