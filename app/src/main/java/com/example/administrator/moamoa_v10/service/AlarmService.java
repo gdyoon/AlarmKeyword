@@ -17,6 +17,7 @@ import com.example.administrator.moamoa_v10.Config.DataConfig;
 import com.example.administrator.moamoa_v10.MainActivity;
 import com.example.administrator.moamoa_v10.R;
 import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
@@ -52,7 +53,7 @@ public class AlarmService extends Service{
     public void onCreate()
     {
         super.onCreate();
-
+        FacebookSdk.sdkInitialize(getApplicationContext());
         Log.i("KEYWORD", "알람 서비스 시작 !");
 
         request = new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/feed", null, HttpMethod.GET,
@@ -67,6 +68,7 @@ public class AlarmService extends Service{
 
                               //  if(response.getJSONObject().getJSONArray("data") == null)
                               //      return;
+
 
                                 JSONArray jarray = response.getJSONObject().getJSONArray("data");
 
@@ -109,10 +111,15 @@ public class AlarmService extends Service{
 
                                 }
                             }
+                            catch (NullPointerException e)
+                            {
+                                e.printStackTrace();
+                            }
                             catch (JSONException e)
                             {
                                 e.printStackTrace();
                             }
+
                     }
 
                 }

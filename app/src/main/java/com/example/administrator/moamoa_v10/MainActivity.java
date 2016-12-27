@@ -44,6 +44,7 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    final String LOG_TAG = MainActivity.class.getSimpleName();
     Facebook facebook               = null;
     RecyclerView rv_post_list       = null;
     ArrayList<String> keywordList   = null;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
 
                 final EditText et = new EditText(getApplicationContext());
+                et.setTextColor(Color.BLACK);
                 final View _view = view;
                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
                 dialog.setTitle("키워드를 입력해주세요");
@@ -98,9 +100,9 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
                         String inputValue = et.getText().toString();
 
-                        for(int i=0; i<keywordList.size(); i++)
+                        for(int i=0; i<DataConfig.KeywordList.size(); i++)
                         {
-                            if(keywordList.get(i).equals(inputValue) == true)
+                            if(DataConfig.KeywordList.get(i).equals(inputValue) == true)
                             {
                                 Snackbar.make(_view, "이미 존재하는 키워드 입니다.", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity
                             }
                         }
 
-                        keywordList.add(inputValue);
+                        DataConfig.KeywordList.add(inputValue);
 
                         // SharedPreference 공간에 저장
                         DataConfig.setKeywordArrayPref(getApplicationContext(), "KeywordList", keywordList);
@@ -219,6 +221,70 @@ public class MainActivity extends AppCompatActivity
                             startService(intent);
                         }},2000);
 
+                    break;
+
+                case R.id.nav_instagram:
+                    break;
+
+                case R.id.nav_twitter:
+                    break;
+
+                case R.id.nav_keyword:
+                    Log.i(LOG_TAG,"Data Size : " + DataConfig.KeywordList.size());
+
+                    final CharSequence[] items = DataConfig.KeywordList.toArray(new CharSequence[DataConfig.KeywordList.size()]);
+                    final boolean[] keywordsChecked = new boolean[items.length];
+
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("키워드 관리(1개 선택가능)");
+                    builder.setMultiChoiceItems( items, keywordsChecked, new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            Log.i(LOG_TAG, "index : " + which);
+                            keywordsChecked[which] = isChecked;
+                        }
+                    });
+
+                    DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            if(which == DialogInterface.BUTTON_POSITIVE)
+                            {
+                                for(int i=0; i< keywordsChecked.length; i++)
+                                {
+                                    if(keywordsChecked[i] == true)
+                                    {
+                                        try {
+                                            DataConfig.KeywordList.remove(i);
+                                        }
+                                        catch(IndexOutOfBoundsException ex)
+                                        {
+                                            Toast.makeText(MainActivity.this, "삭제되지 않은 것도 있습니다.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                }
+                            }
+                            else if(which == DialogInterface.BUTTON_NEUTRAL)
+                            {
+                                dialog.dismiss();
+                            }
+
+                            //DataConfig.setKeywordArrayPref(getApplicationContext(), "KeywordList",  DataConfig.KeywordList);
+                            //DataConfig.getKeywordArrayPref(getApplicationContext(), "KeywordList");
+                        }
+                    };
+
+                    builder.setPositiveButton("삭제", listener);
+                    builder.setNegativeButton("취소", listener);
+                    builder.create().show();
+
+
+
+                    break;
+
+                case R.id.nav_share:
                     break;
             }
         }
