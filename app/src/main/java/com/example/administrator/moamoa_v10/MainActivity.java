@@ -3,6 +3,11 @@ package com.example.administrator.moamoa_v10;
 import android.app.ActionBar;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.camera2.params.Face;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,8 +52,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("모아모아");
         setContentView(R.layout.activity_main);
+
+
 
         // 페이스북 api
         facebook = new Facebook(this);
@@ -60,7 +66,21 @@ public class MainActivity extends AppCompatActivity
 
         // 추후에 애니메이션 적용
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        toolbar.setTitle("모아모아");
+        toolbar.setTitleTextColor(Color.BLACK);
+
+/*
+        Drawable dr = getResources().getDrawable(R.drawable.ic_app_title);
+        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+        Drawable d = new BitmapDrawable(getResources(),
+                Bitmap.createScaledBitmap(bitmap, 300, 300, true));
+
+        toolbar.setLogo(R.drawable.ic_app_title);
+      */
         setSupportActionBar(toolbar);
+
+
 
         // 우측 하단 버튼
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -112,9 +132,6 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-
-
-
         // Drawer 기능을 이용하기 위한 레이아웃
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -123,6 +140,9 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
+
+
 
         // 왼쪽 상단 액션바 토글시 불러오는 메뉴
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);

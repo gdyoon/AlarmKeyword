@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.administrator.moamoa_v10.Config.DataConfig;
 import com.example.administrator.moamoa_v10.mainview.Postitem;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -59,7 +60,7 @@ public class Facebook {
     FacebookCallback<LoginResult> loginCallback = new FacebookCallback<LoginResult>() {
 
         @Override
-        public void onSuccess(LoginResult loginResult) {
+        public void onSuccess(final LoginResult loginResult) {
             GraphRequest request = new GraphRequest(
                     loginResult.getAccessToken(),
                     "/me/feed",
@@ -70,7 +71,7 @@ public class Facebook {
                             //Log.i("FACEBOOK", response.getJSONObject().toString());
 
                             String post_name, post_link, post_story, post_msg, post_pic;
-
+                            //DataConfig.accessToken = loginResult.getAccessToken();
                             try
                             {
                                 JSONArray jarray = response.getJSONObject().getJSONArray("data");

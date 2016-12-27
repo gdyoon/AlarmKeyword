@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 public class DataConfig {
     public static ArrayList<String> KeywordList = new ArrayList<String>();
+
     //public static AccessToken accessToken = null;
 
     public static void setKeywordArrayPref(Context _context, String _key, ArrayList<String> values )

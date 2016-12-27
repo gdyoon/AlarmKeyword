@@ -33,13 +33,13 @@ import java.util.ArrayList;
 
 public class AlarmService extends Service{
 
+    private final String LOG_TAG = AlarmService.class.getSimpleName();
     private NotificationManager m_Notifi_Mgr;
     private AlarmServiceThread m_thread;
     private Notification m_Notifi;
     private GraphRequest request;
-
-
-
+    private long latest_post_id = 1;
+    private boolean is_initdata = false;
 
     @Nullable
     @Override
@@ -55,8 +55,6 @@ public class AlarmService extends Service{
 
         Log.i("KEYWORD", "알람 서비스 시작 !");
 
-
-
         request = new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/feed", null, HttpMethod.GET,
                 new GraphRequest.Callback()
                 {
@@ -64,40 +62,50 @@ public class AlarmService extends Service{
                     {
                             try
                             {
-                                if(AccessToken.getCurrentAccessToken() == null) return;
+                                if(AccessToken.getCurrentAccessToken() == null)
+                                    return;
+
+                              //  if(response.getJSONObject().getJSONArray("data") == null)
+                              //      return;
 
                                 JSONArray jarray = response.getJSONObject().getJSONArray("data");
-                                Intent intent = new Intent(AlarmService.this, MainActivity.class);
-                                PendingIntent pendingIntent = PendingIntent.getActivity(AlarmService.this, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
 
-                                Log.i("KEYWORD", jarray.toString());
-                                for (int i = 0; i < jarray.length(); i++) {
+
+                                //Log.i(LOG_TAG, AccessToken.getCurrentAccessToken().toString());
+                                if( !is_initdata )
+                                {
+                                    is_initdata = true;
+                                    String id = jarray.getJSONObject(0).getString("id");
+                                    id = (id.split("_"))[1];
+                                    latest_post_id = Long.parseLong(id);
+                                    Log.i("KEYWORD", "초기 글 ID 초기화");
+                                }
+
+
+                                for (int i = 0; i < jarray.length(); i++)
+                                {
                                     JSONObject responseObject = jarray.getJSONObject(i);
                                     String message = responseObject.getString("message");
+                                    long current_post_id = Long.parseLong(responseObject.getString("id").split("_")[1]);
 
-                                    for (int j = 0; j < DataConfig.KeywordList.size(); j++) {
-                                        Log.i("KEYWORD", DataConfig.KeywordList.get(j));
+                                    Log.i("KEYWORD", "현재 글 ID : " + current_post_id);
+                                    Log.i("KEYWORD", "최근 글 ID : " + latest_post_id);
 
-                                        if (message.contains(DataConfig.KeywordList.get(j)))
+                                    for (int j = 0; j < DataConfig.KeywordList.size(); j++)
+                                    {
+                                        //Log.i("KEYWORD", DataConfig.KeywordList.get(j));
+                                        if (message.contains(DataConfig.KeywordList.get(j)) && current_post_id > latest_post_id)
                                         {
                                             Log.i("KEYWORD", "키워드 일치 ! !");
-                                            m_Notifi = new Notification.Builder(getApplicationContext())
-                                                    .setContentTitle("새로운 글이 감지되었습니다")
-                                                    .setContentText("키워드 명 :" + DataConfig.KeywordList.get(j))
-                                                    .setSmallIcon(R.drawable.ic_menu_facebook)
-                                                    .setTicker("노티피케이션")
-                                                    .setContentIntent(pendingIntent)
-                                                    .build();
-                                            //소리추가
-                                            m_Notifi.defaults = Notification.DEFAULT_SOUND;
-                                            //알림 소리를 한번만 내도록
-                                            m_Notifi.flags = Notification.FLAG_ONLY_ALERT_ONCE;
-                                            //확인하면 자동으로 알림이 제거 되도록
-                                            m_Notifi.flags = Notification.FLAG_AUTO_CANCEL;
-                                            m_Notifi_Mgr.notify(777, m_Notifi);
+                                            triggerNotification(DataConfig.KeywordList.get(j));
+                                        }
+                                        else
+                                        {
+                                            String id = jarray.getJSONObject(0).getString("id");
+                                            id = (id.split("_"))[1];
+                                            latest_post_id = Long.parseLong(id);
                                         }
                                     }
-
 
                                 }
                             }
@@ -112,6 +120,27 @@ public class AlarmService extends Service{
 
 
     }
+
+    private void triggerNotification(String _keyword)
+    {
+        Intent intent = new Intent(AlarmService.this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(AlarmService.this, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        m_Notifi = new Notification.Builder(getApplicationContext())
+                .setContentTitle("새로운 글이 감지되었습니다")
+                .setContentText("키워드 명 :" + _keyword)
+                .setSmallIcon(R.drawable.ic_menu_facebook)
+                .setTicker("노티피케이션")
+                .setContentIntent(pendingIntent)
+                .build();
+
+        m_Notifi.defaults = Notification.DEFAULT_SOUND;
+        m_Notifi.flags = Notification.FLAG_ONLY_ALERT_ONCE;
+        m_Notifi.flags = Notification.FLAG_AUTO_CANCEL;
+
+        m_Notifi_Mgr.notify(777, m_Notifi);
+    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
