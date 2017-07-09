@@ -1,1 +1,1 @@
-﻿이것은 키워드 알람에 대한 페이스북 그래프 API 사용을 기반으로 한 프로젝트 입니다.
+This is a project based on the use of the Facebook Graph API for keyword alarms.
